@@ -61,6 +61,12 @@ dependencies {
     implementation files('libs/classes.jar')
 }
 
+def cred = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    cred.load(new FileInputStream(localPropertiesFile))
+}
+
 afterEvaluate {
     publishing {
         publications {
@@ -103,8 +109,8 @@ afterEvaluate {
                 url = 'https://central.sonatype.com/api/v1/publisher/deployments/maven'
                 credentials {
                     // Load values from local.properties
-                    username = project.findProperty('maven.username')
-                    password = project.findProperty('maven.password')
+                    username = cred.getProperty('maven.username')
+                    password = cred.getProperty('maven.password')
                 }
             }
         }
@@ -112,9 +118,9 @@ afterEvaluate {
 
     signing {
         // Load values from local.properties
-        def signingKeyId = project.findProperty('signing.key_id')
-        def signingKey = project.findProperty('signing.key')
-        def signingPassword = project.findProperty('signing.password')
+        def signingKeyId = cred.getProperty('signing.key_id')
+        def signingKey = cred.getProperty('signing.key')
+        def signingPassword = cred.getProperty('signing.password')
 
         useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
 
