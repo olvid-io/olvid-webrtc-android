@@ -1,0 +1,123 @@
+buildscript {
+    repositories {
+        google()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:9.0.0'
+    }
+}
+
+plugins {
+    id 'maven-publish'
+    id 'signing'
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    namespace = 'io.olvid.messenger.webrtc'
+
+    compileSdkVersion 36
+
+    defaultConfig {
+        minSdkVersion 23
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = false
+            shrinkResources = false
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs/jni']
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    publishing {
+        singleVariant('release')
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+dependencies {
+    implementation files('libs/classes.jar')
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'io.olvid.messenger'
+                artifactId = project.name
+                version = 7390
+
+                pom {
+                    name = 'Olvid WebRTC for Android'
+                    description = 'Patched version of WebRTC for the Android Olvid application'
+                    url = 'https://github.com/olvid-io/olvid-webrtc-android'
+
+                    scm {
+                        url = 'https://github.com/olvid-io/olvid-webrtc-android'
+                    }
+
+                    licenses {
+                        license {
+                            name = 'The GNU Affero General Public License, Version 3.0'
+                            url = 'LICENSE'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'finiasz'
+                            name = 'Matthieu Finiasz'
+                            email = 'opensource@olvid.io'
+                        }
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                url = 'https://central.sonatype.com/api/v1/publisher/deployments/maven'
+                credentials {
+                    // Load values from local.properties
+                    username = project.findProperty('maven.username')
+                    password = project.findProperty('maven.password')
+                }
+            }
+        }
+    }
+
+    signing {
+        // Load values from local.properties
+        def signingKeyId = project.findProperty('signing.key_id')
+        def signingKey = project.findProperty('signing.key')
+        def signingPassword = project.findProperty('signing.password')
+
+        useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+
+        sign publishing.publications.release
+    }
+}
