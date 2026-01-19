@@ -75,7 +75,7 @@ afterEvaluate {
 
                 groupId = 'io.olvid.messenger'
                 artifactId = project.name
-                version = 7390
+                version = 7559
 
                 pom {
                     name = 'Olvid WebRTC for Android'
