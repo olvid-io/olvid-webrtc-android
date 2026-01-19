@@ -5,13 +5,40 @@
 This repository contains what is required to publish a patched version of WebRTC, as used in the [Android Olvid application](https://github.com/olvid-io/olvid-android), to Maven Central repository.
 
 
-# What was changed
+# What we changed in WebRTC
 
-Compared to the original WebRTC implementation, our patched version adds:
-- support for HTTP/HTTPS proxy, which was present in old versions of WebRTC but was dropped,
+Compared to the original WebRTC implementation, our patched version contains some minor modifications:
+- support for HTTP/HTTPS proxy,
 - the possibility to configuration of a custom User-Agent.
+
+This way, Olvid is able to issue secure audio & video calls using a TCP connection through a proxy on networks where UDP is blocked and a proxy is mandatory (note that, in the browser, WebRTC is able to do this, the APIs are simply not available in the Android version of the library).
+
+The contents of the patches we apply can be found in the [`patches/`](patches/) folder. The release version numbers for this library are aligned with the WebRTC build numbers as seen on [Chromium dash](https://chromiumdash.appspot.com/branches).
+
+
+# Building from the sources
+
+This project only takes care of publishing to Maven Central, and contains a pre-compiled version of the WebRTC library that we update with (almost) every new stable release of WebRTC. Bundling pre-compiled open-source libraries in an open-source project is not usually considered good practice, but the effort required to compile WebRTC is such that we decided to make your life easier 😊
+
+If you want to compile WebRTC yourself, you should follow the standard WebRTC build procedure, simply applying the provided patch:
+
+- clone the `depot tools`
+- fetch `webrtc_android`
+- sync with `gclient`
+- checkout the `branch-heads/xxxx` you want to compile
+- **apply the Olvid patch available in the [`patches/`](patches/) folder corresponding to the `xxxx` version you chose** (you can use the `git apply olvid_xxxx.patch` command)
+- compile with `build_aar.py`
  
-The contents of the patch can be found in the github reposition of the Android Olvid application, [here](https://github.com/olvid-io/olvid-android/tree/main/obv_messenger/libwebrtc). The release versions for this library are aligned with the WebRTC build numbers as seen on [Chromium dash](https://chromiumdash.appspot.com/branches).
+Finally, in the main [`build.gradle`](https://github.com/olvid-io/olvid-android/blob/main/obv_messenger/app/build.gradle) file of Olvid for Android, replace the line:
+```
+implementation 'io.olvid.messenger:olvid-webrtc-android:xxxx'
+```
+with a line like 
+```
+implementation files('../libwebrtc.aar')
+```
+pointing towards your newly compiled aar.
+
 
 
 # License
