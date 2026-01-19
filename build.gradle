@@ -106,7 +106,8 @@ afterEvaluate {
 
         repositories {
             maven {
-                url = 'https://central.sonatype.com/api/v1/publisher/deployments/maven'
+                name = 'ossrh-staging-api'
+                url = 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
                 credentials {
                     // Load values from local.properties
                     username = cred.getProperty('maven.username')
